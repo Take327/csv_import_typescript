@@ -47,7 +47,7 @@ const main = () => {
 
         // 二つの配列をIDを元に結合する
         ERROR = 'E00007';
-        const result = joinToArray(arrayA, 9, arrayB, 0);
+        const result = joinToArray(arrayA, 0, arrayB, 0);
 
         // 配列を出力文字化
         const outputText = result.map((row) => row.join(',')).join('\n');
