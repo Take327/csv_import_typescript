@@ -1,4 +1,7 @@
 import fs from 'fs';
+import { parse } from 'csv-parse/sync';
+import iconv from 'iconv-lite';
+import jschardet from 'jschardet';
 
 const main = () => {
     let ERROR;
@@ -32,12 +35,14 @@ const main = () => {
         }
 
         ERROR = 'E00005';
-        // ファイルを読み込む 文字コードを指定するとStringで返却される
-        const textA = fs.readFileSync(pathA, 'utf-8');
-        const textB = fs.readFileSync(pathB, 'utf-8');
+        // CSVを配列に変換する
+        const arrayA: [] = convertToArray(pathA);
 
-        console.log('textA', textA);
-        console.log('textB', textB);
+        ERROR = 'E00006';
+        const arrayB: [] = convertToArray(pathB);
+
+        console.log('textA', arrayA);
+        console.log('textB', arrayB);
     } catch (e) {
         console.error('エラーコード:', ERROR);
         console.error(e);
@@ -70,6 +75,28 @@ const inputPathChack = (inputPath: string): string => {
         return '';
     } catch (e) {
         console.error('inputPathsChackでエラーが発生しました', e);
+    }
+};
+
+/**
+ *ファイルパスを受取、CSVを変換し配列にして返却する
+ * @param path
+ * @returns
+ */
+const convertToArray = (path: string): [] => {
+    try {
+        // Bufferにてファイル内テキストを取得
+        const text = fs.readFileSync(path);
+        // テキストから文字コードを取得
+        const detect = jschardet.detect(text);
+        // iconvにてテキストを変換
+        const convertText = iconv.decode(text, detect.encoding);
+        // カンマ区切りで配列に変換
+        const array: [] = parse(convertText);
+
+        return array;
+    } catch (e) {
+        console.error('convertToArrayでエラーが発生しました', e);
     }
 };
 
