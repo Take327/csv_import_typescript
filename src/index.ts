@@ -6,11 +6,16 @@ import jschardet from 'jschardet';
 const main = () => {
     let ERROR;
     try {
+        let errorMessage = '';
         ERROR = 'E00001';
         const inputPaths: string[] = process.argv.slice(2);
         // 入力されているファイルパスが2つあるか確認する
         if (inputPaths.length !== 2) {
-            throw new Error('CSVファイルのパスを2つ入力してください');
+            errorMessage = 'CSVファイルのパスを2つ入力してください';
+        }
+        if (errorMessage !== '') {
+            console.error(errorMessage);
+            return;
         }
 
         ERROR = 'E00002';
@@ -19,10 +24,9 @@ const main = () => {
 
         ERROR = 'E00003';
         // 第一ファイルチェック
-        let errorMessage = '';
         errorMessage = inputPathChack(pathA);
         if (errorMessage !== '') {
-            console.log(errorMessage);
+            console.error(errorMessage);
             return;
         }
 
@@ -30,12 +34,12 @@ const main = () => {
         // 第二ファイルチェック
         errorMessage = inputPathChack(pathB);
         if (errorMessage !== '') {
-            console.log(errorMessage);
+            console.error(errorMessage);
             return;
         }
 
-        ERROR = 'E00005';
         // CSVを配列に変換する
+        ERROR = 'E00005';
         const arrayA: string[][] = convertToArray(pathA);
         ERROR = 'E00006';
         const arrayB: string[][] = convertToArray(pathB);
