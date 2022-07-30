@@ -36,13 +36,15 @@ const main = () => {
 
         ERROR = 'E00005';
         // CSVを配列に変換する
-        const arrayA: [] = convertToArray(pathA);
-
+        const arrayA: string[][] = convertToArray(pathA);
         ERROR = 'E00006';
-        const arrayB: [] = convertToArray(pathB);
+        const arrayB: string[][] = convertToArray(pathB);
 
-        console.log('textA', arrayA);
-        console.log('textB', arrayB);
+        //二つの配列をIDを元に結合する
+        ERROR = 'E00007';
+        const result = joinToArray(arrayA, 0, arrayB, 0);
+
+        console.log('result', result);
     } catch (e) {
         console.error('エラーコード:', ERROR);
         console.error(e);
@@ -54,28 +56,24 @@ const main = () => {
  * @param inputPath
  */
 const inputPathChack = (inputPath: string): string => {
-    try {
-        // ファイルパスの存在チェック
-        if (!fs.existsSync(inputPath)) {
-            return 'ファイルパスが存在しません';
-        }
-
-        // ファイル種類チェック
-        const reg = / *.csv$/;
-        if (!reg.test(inputPath)) {
-            return 'CSVファイルではないファイルが含まれます';
-        }
-
-        // ファイルサイズチェック
-        const state = fs.statSync(inputPath);
-        if (state.size === 0) {
-            return '0バイトのファイルは処理できません';
-        }
-
-        return '';
-    } catch (e) {
-        console.error('inputPathsChackでエラーが発生しました', e);
+    // ファイルパスの存在チェック
+    if (!fs.existsSync(inputPath)) {
+        return 'ファイルパスが存在しません';
     }
+
+    // ファイル種類チェック
+    const reg = / *.csv$/;
+    if (!reg.test(inputPath)) {
+        return 'CSVファイルではないファイルが含まれます';
+    }
+
+    // ファイルサイズチェック
+    const state = fs.statSync(inputPath);
+    if (state.size === 0) {
+        return '0バイトのファイルは処理できません';
+    }
+
+    return '';
 };
 
 /**
@@ -83,21 +81,54 @@ const inputPathChack = (inputPath: string): string => {
  * @param path
  * @returns
  */
-const convertToArray = (path: string): [] => {
-    try {
-        // Bufferにてファイル内テキストを取得
-        const text = fs.readFileSync(path);
-        // テキストから文字コードを取得
-        const detect = jschardet.detect(text);
-        // iconvにてテキストを変換
-        const convertText = iconv.decode(text, detect.encoding);
-        // カンマ区切りで配列に変換
-        const array: [] = parse(convertText);
+const convertToArray = (path: string): string[][] => {
+    // Bufferにてファイル内テキストを取得
+    const text = fs.readFileSync(path);
+    // テキストから文字コードを取得
+    const detect = jschardet.detect(text);
+    // iconvにてテキストを変換
+    const convertText = iconv.decode(text, detect.encoding);
+    // カンマ区切りで配列に変換
+    const array: string[][] = parse(convertText);
 
-        return array;
-    } catch (e) {
-        console.error('convertToArrayでエラーが発生しました', e);
-    }
+    // 先頭配列を削除
+    array.shift();
+
+    return array;
+};
+
+/**
+ * arrayAのidIndexAを元にarrayBをInner Joinにて結合する
+ * @param arrayA
+ * @param idIndexA
+ * @param arrayB
+ * @param idIndexB
+ * @returns
+ */
+const joinToArray = (arrayA: string[][], idIndexA: number, arrayB: string[][], idIndexB: number): string[][] => {
+    const map = arrayA.map((leftRow) => {
+        //idが一致するrowをサーチする
+        const rightRow = arrayB.find((row) => {
+            return leftRow[idIndexA] === row[idIndexB];
+        });
+
+        //該当するrightRowがない場合はleftRowだけで返却
+        const row = leftRow;
+        if (!rightRow) {
+            return row;
+        }
+
+        //leftRowの後ろにrightRowを追加する
+        for (let i = 0; i < rightRow.length; i++) {
+            if (i > idIndexB) {
+                row.push(rightRow[i]);
+            }
+        }
+
+        return row;
+    });
+
+    return map;
 };
 
 (() => main())();
