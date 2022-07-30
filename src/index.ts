@@ -10,8 +10,8 @@ const main = () => {
         ERROR = 'E00001';
         const inputPaths: string[] = process.argv.slice(2);
         // 入力されているファイルパスが2つあるか確認する
-        if (inputPaths.length !== 2) {
-            errorMessage = 'CSVファイルのパスを2つ入力してください';
+        if (inputPaths.length !== 3) {
+            errorMessage = 'CSVファイルのパスを3つ入力してください';
         }
         if (errorMessage !== '') {
             console.error(errorMessage);
@@ -21,6 +21,7 @@ const main = () => {
         ERROR = 'E00002';
         const pathA = inputPaths[0];
         const pathB = inputPaths[1];
+        const pathC = inputPaths[2];
 
         ERROR = 'E00003';
         // 第一ファイルチェック
@@ -44,9 +45,19 @@ const main = () => {
         ERROR = 'E00006';
         const arrayB: string[][] = convertToArray(pathB);
 
-        //二つの配列をIDを元に結合する
+        // 二つの配列をIDを元に結合する
         ERROR = 'E00007';
-        const result = joinToArray(arrayA, 0, arrayB, 0);
+        const result = joinToArray(arrayA, 9, arrayB, 0);
+
+        // 配列を出力文字化
+        const outputText = result.map((row) => row.join(',')).join('\n');
+
+        fs.writeFile(pathC, iconv.encode(outputText, 'Shift_JIS'), (error) => {
+            if (error) {
+                throw error;
+            }
+            console.log('test.txtが作成されました');
+        });
 
         console.log('result', result);
     } catch (e) {
@@ -110,19 +121,35 @@ const convertToArray = (path: string): string[][] => {
  * @returns
  */
 const joinToArray = (arrayA: string[][], idIndexA: number, arrayB: string[][], idIndexB: number): string[][] => {
+    let maxLength = 0;
+
+    arrayB.forEach((row) => {
+        if (maxLength < row.length) {
+            maxLength = row.length;
+        }
+    });
+
     const map = arrayA.map((leftRow) => {
-        //idが一致するrowをサーチする
+        // idが一致するrowをサーチする
         const rightRow = arrayB.find((row) => {
             return leftRow[idIndexA] === row[idIndexB];
         });
-
-        //該当するrightRowがない場合はleftRowだけで返却
-        const row = leftRow;
+        // rightRowがない場合は配列を初期化する
         if (!rightRow) {
-            return row;
+            return [];
         }
 
-        //leftRowの後ろにrightRowを追加する
+        //
+        if (maxLength > rightRow.length) {
+            for (let i = rightRow.length; i < maxLength; i++) {
+                rightRow.push('');
+            }
+        }
+
+        // 戻り値
+        const row = Array.from(leftRow);
+
+        // leftRowの後ろにrightRowを追加する
         for (let i = 0; i < rightRow.length; i++) {
             if (i > idIndexB) {
                 row.push(rightRow[i]);
@@ -132,7 +159,7 @@ const joinToArray = (arrayA: string[][], idIndexA: number, arrayB: string[][], i
         return row;
     });
 
-    return map;
+    return map.filter((row) => row.length !== 0);
 };
 
 (() => main())();
