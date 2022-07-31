@@ -64,19 +64,7 @@ export default class InputParams {
         }
 
         // 出力ファイルパスチェック
-        fs.stat(inputParams[2], (err, stat) => {
-            if (err) {
-                console.log('true');
-                errorMassege = '出力先が確認できません';
-            } else {
-                console.log('else');
-                stat.isFile()
-                    ? (this.outputFlg = 0)
-                    : stat.isDirectory()
-                    ? (this.outputFlg = 1)
-                    : (errorMassege = '出力先が確認できません');
-            }
-        });
+        errorMassege = this.outPathChack(inputParams[2]);
         if (errorMassege !== '') {
             this.errorMassege = errorMassege;
             return;
@@ -94,6 +82,24 @@ export default class InputParams {
         if (errorMassege !== '') {
             this.errorMassege = errorMassege;
         }
+    };
+
+    private outPathChack = (outPath: string): string => {
+        const check = fs.existsSync(outPath);
+
+        const reg = / *.csv$/;
+        const regCheck = reg.test(outPath);
+        if (check && regCheck) {
+            this.outputFlg = 0;
+            return '';
+        }
+
+        if (check && !regCheck) {
+            this.outputFlg = 1;
+            return '';
+        }
+
+        return '出力先が存在しません';
     };
 
     private csvFileChack = (inputPath: string): string => {
