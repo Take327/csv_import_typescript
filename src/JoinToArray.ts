@@ -1,20 +1,20 @@
 export default class JoinToArray {
     private arrayA: string[][];
     private arrayB: string[][];
-    private maxLengthA: number; //arrayAの最大要素数
-    private maxLengthB: number; //arrayBの最大要素数
+    private maxLengthA: number; // arrayAの最大要素数
+    private maxLengthB: number; // arrayBの最大要素数
 
     constructor(arrayA: string[][], arrayB: string[][]) {
-        //maxLengthAを更新
+        // maxLengthAを更新
         this.maxLengthA = this.maxLengthCheck(arrayA);
 
-        //maxLengthBを更新
+        // maxLengthBを更新
         this.maxLengthB = this.maxLengthCheck(arrayB);
 
-        //最大要素数で合わせたarrayA
+        // 最大要素数で合わせたarrayA
         this.arrayA = this.arrayFitToMaximum(arrayA, this.maxLengthA);
 
-        //最大要素数で合わせたarrayB
+        // 最大要素数で合わせたarrayB
         this.arrayB = this.arrayFitToMaximum(arrayB, this.maxLengthB);
     }
 
@@ -25,7 +25,7 @@ export default class JoinToArray {
      * @returns
      */
     private arrayFitToMaximum = (array: string[][], maxLength: number): string[][] => {
-        let result = array.map((row) => {
+        const result = array.map((row) => {
             if (row.length < maxLength) {
                 for (let i = row.length; i < maxLength; i++) {
                     row.push('');

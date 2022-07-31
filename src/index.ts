@@ -4,38 +4,16 @@ import iconv from 'iconv-lite';
 import jschardet from 'jschardet';
 
 import JoinToArray from './JoinToArray';
+import InputParams from './InputParams';
 
 const main = () => {
     let ERROR;
     try {
         let errorMessage = '';
         ERROR = 'E00001';
-        const inputPaths: string[] = process.argv.slice(2);
-        // 入力されているファイルパスが2つあるか確認する
-        if (inputPaths.length !== 3) {
-            errorMessage = 'CSVファイルのパスを3つ入力してください';
-        }
-        if (errorMessage !== '') {
-            console.error(errorMessage);
-            return;
-        }
+        const inputParams = new InputParams(process.argv.slice(2));
 
-        ERROR = 'E00002';
-        const pathA = inputPaths[0]; //inputファイルパス1
-        const pathB = inputPaths[1]; //inputファイルパス2
-        const pathC = inputPaths[2]; //outputファイルパス
-
-        ERROR = 'E00003';
-        // 第一ファイルチェック
-        errorMessage = inputFileChack(pathA);
-        if (errorMessage !== '') {
-            console.error(errorMessage);
-            return;
-        }
-
-        ERROR = 'E00004';
-        // 第二ファイルチェック
-        errorMessage = inputFileChack(pathB);
+        errorMessage = inputParams.getErrorMassege();
         if (errorMessage !== '') {
             console.error(errorMessage);
             return;
@@ -43,9 +21,9 @@ const main = () => {
 
         // CSVを配列に変換する
         ERROR = 'E00005';
-        const arrayA: string[][] = convertToArray(pathA);
+        const arrayA: string[][] = convertToArray(inputParams.getInputFilePathA());
         ERROR = 'E00006';
-        const arrayB: string[][] = convertToArray(pathB);
+        const arrayB: string[][] = convertToArray(inputParams.getInputFilePathB());
 
         // 二つの配列をIDを元に結合する
         ERROR = 'E00007';
@@ -56,7 +34,7 @@ const main = () => {
         // 配列を出力文字化
         ERROR = 'E00008';
         const outputText = result.map((row) => row.join(',')).join('\n');
-        fs.writeFile(pathC, iconv.encode(outputText, 'Shift_JIS'), (error) => {
+        fs.writeFile(inputParams.getOutputFilePath(), iconv.encode(outputText, 'Shift_JIS'), (error) => {
             if (error) {
                 throw error;
             }
@@ -66,31 +44,6 @@ const main = () => {
         console.error('エラーコード:', ERROR);
         console.error(e);
     }
-};
-
-/**
- *ファイルパスのチェックを行う
- * @param inputPath
- */
-const inputFileChack = (inputPath: string): string => {
-    // ファイルパスの存在チェック
-    if (!fs.existsSync(inputPath)) {
-        return 'ファイルパスが存在しません';
-    }
-
-    // ファイル種類チェック
-    const reg = / *.csv$/;
-    if (!reg.test(inputPath)) {
-        return 'CSVファイルではないファイルが含まれます';
-    }
-
-    // ファイルサイズチェック
-    const state = fs.statSync(inputPath);
-    if (state.size === 0) {
-        return '0バイトのファイルは処理できません';
-    }
-
-    return '';
 };
 
 /**
