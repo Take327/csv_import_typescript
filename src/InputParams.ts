@@ -42,6 +42,11 @@ export default class InputParams {
         }
     }
 
+    /**
+     * 入力されたパラメータを解析し、エラーテキストをthis.errorMassegeに格納する
+     * @param inputParams
+     * @returns
+     */
     private checkInputParams = (inputParams: string[]) => {
         if (inputParams.length < 3) {
             this.errorMassege = '引数が足りません';
@@ -84,6 +89,11 @@ export default class InputParams {
         }
     };
 
+    /**
+     * 出力先フォルダおよびファイル名をチェックする
+     * @param outPath
+     * @returns
+     */
     private outPathChack = (outPath: string): string => {
         const check = fs.existsSync(outPath);
 
@@ -102,6 +112,11 @@ export default class InputParams {
         return '出力先が存在しません';
     };
 
+    /**
+     * 入力CSVファイルのチェックを行う
+     * @param inputPath
+     * @returns
+     */
     private csvFileChack = (inputPath: string): string => {
         // ファイルパスの存在チェック
         if (!fs.existsSync(inputPath)) {
