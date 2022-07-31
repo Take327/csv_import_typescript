@@ -20,19 +20,20 @@ const main = () => {
         }
 
         // CSVを配列に変換する
-        ERROR = 'E00005';
+        ERROR = 'E00002';
         const arrayA: string[][] = convertToArray(inputParams.getInputFilePathA());
-        ERROR = 'E00006';
+        ERROR = 'E00003';
         const arrayB: string[][] = convertToArray(inputParams.getInputFilePathB());
 
         // 二つの配列をIDを元に結合する
-        ERROR = 'E00007';
+        ERROR = 'E00004';
         const joinToArray = new JoinToArray(arrayA, arrayB);
 
-        const result = joinToArray.innerJoin(0, 0);
+        ERROR = 'E00005';
+        const result = joinToArray.innerJoin(inputParams.getKeyIndexA(), inputParams.getKeyIndexB());
 
         // 配列を出力文字化
-        ERROR = 'E00008';
+        ERROR = 'E00006';
         const outputText = result.map((row) => row.join(',')).join('\n');
         fs.writeFile(inputParams.getOutputFilePath(), iconv.encode(outputText, 'Shift_JIS'), (error) => {
             if (error) {

@@ -58,6 +58,10 @@ export default class JoinToArray {
     };
 
     public innerJoin = (idIndexA: number, idIndexB: number): string[][] => {
+        if (this.maxLengthA < idIndexA || this.maxLengthB < idIndexB) {
+            throw new Error('設定されたキーインデントが列数を超えています。');
+        }
+
         const map = this.arrayA.map((leftRow) => {
             // idが一致するrowをサーチする
             const rightRow = this.arrayB.find((row) => {
