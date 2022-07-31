@@ -3,6 +3,8 @@ import { parse } from 'csv-parse/sync';
 import iconv from 'iconv-lite';
 import jschardet from 'jschardet';
 
+import JoinToArray from './JoinToArray';
+
 const main = () => {
     let ERROR;
     try {
@@ -19,13 +21,13 @@ const main = () => {
         }
 
         ERROR = 'E00002';
-        const pathA = inputPaths[0];
-        const pathB = inputPaths[1];
-        const pathC = inputPaths[2];
+        const pathA = inputPaths[0]; //inputファイルパス1
+        const pathB = inputPaths[1]; //inputファイルパス2
+        const pathC = inputPaths[2]; //outputファイルパス
 
         ERROR = 'E00003';
         // 第一ファイルチェック
-        errorMessage = inputPathChack(pathA);
+        errorMessage = inputFileChack(pathA);
         if (errorMessage !== '') {
             console.error(errorMessage);
             return;
@@ -33,7 +35,7 @@ const main = () => {
 
         ERROR = 'E00004';
         // 第二ファイルチェック
-        errorMessage = inputPathChack(pathB);
+        errorMessage = inputFileChack(pathB);
         if (errorMessage !== '') {
             console.error(errorMessage);
             return;
@@ -47,19 +49,19 @@ const main = () => {
 
         // 二つの配列をIDを元に結合する
         ERROR = 'E00007';
-        const result = joinToArray(arrayA, 0, arrayB, 0);
+        const joinToArray = new JoinToArray(arrayA, arrayB);
+
+        const result = joinToArray.innerJoin(0, 0);
 
         // 配列を出力文字化
+        ERROR = 'E00008';
         const outputText = result.map((row) => row.join(',')).join('\n');
-
         fs.writeFile(pathC, iconv.encode(outputText, 'Shift_JIS'), (error) => {
             if (error) {
                 throw error;
             }
-            console.log('test.txtが作成されました');
+            console.log('CSVファイルを作成しました');
         });
-
-        console.log('result', result);
     } catch (e) {
         console.error('エラーコード:', ERROR);
         console.error(e);
@@ -70,7 +72,7 @@ const main = () => {
  *ファイルパスのチェックを行う
  * @param inputPath
  */
-const inputPathChack = (inputPath: string): string => {
+const inputFileChack = (inputPath: string): string => {
     // ファイルパスの存在チェック
     if (!fs.existsSync(inputPath)) {
         return 'ファイルパスが存在しません';
@@ -110,56 +112,6 @@ const convertToArray = (path: string): string[][] => {
     array.shift();
 
     return array;
-};
-
-/**
- * arrayAのidIndexAを元にarrayBをInner Joinにて結合する
- * @param arrayA
- * @param idIndexA
- * @param arrayB
- * @param idIndexB
- * @returns
- */
-const joinToArray = (arrayA: string[][], idIndexA: number, arrayB: string[][], idIndexB: number): string[][] => {
-    let maxLength = 0;
-
-    arrayB.forEach((row) => {
-        if (maxLength < row.length) {
-            maxLength = row.length;
-        }
-    });
-
-    const map = arrayA.map((leftRow) => {
-        // idが一致するrowをサーチする
-        const rightRow = arrayB.find((row) => {
-            return leftRow[idIndexA] === row[idIndexB];
-        });
-        // rightRowがない場合は配列を初期化する
-        if (!rightRow) {
-            return [];
-        }
-
-        //
-        if (maxLength > rightRow.length) {
-            for (let i = rightRow.length; i < maxLength; i++) {
-                rightRow.push('');
-            }
-        }
-
-        // 戻り値
-        const row = Array.from(leftRow);
-
-        // leftRowの後ろにrightRowを追加する
-        for (let i = 0; i < rightRow.length; i++) {
-            if (i > idIndexB) {
-                row.push(rightRow[i]);
-            }
-        }
-
-        return row;
-    });
-
-    return map.filter((row) => row.length !== 0);
 };
 
 (() => main())();
