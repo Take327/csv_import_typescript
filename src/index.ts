@@ -53,7 +53,7 @@ const main = () => {
  * @returns
  */
 const convertToArray = (path: string): string[][] => {
-    // Bufferにてファイル内テキストを取得
+    // Bufferにてファイル内テキストを取得8
     const text = fs.readFileSync(path);
     // テキストから文字コードを取得
     const detect = jschardet.detect(text);
@@ -69,3 +69,4 @@ const convertToArray = (path: string): string[][] => {
 };
 
 (() => main())();
+console.log('実行終了');
